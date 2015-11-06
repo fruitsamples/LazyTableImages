@@ -13,12 +13,12 @@ so the UI is more responsive.
 ===========================================================================
 BUILD REQUIREMENTS:
 
-iPhone SDK 3.0 or later
+iOS 4.0 SDK
 
 ===========================================================================
 RUNTIME REQUIREMENTS:
 
-iPhone OS 3.0 or later
+iPhone OS 3.2 or later
 
 ===========================================================================
 PACKAGING LIST:
@@ -48,5 +48,11 @@ CHANGES FROM PREVIOUS VERSIONS:
 Version 1.0
 - First version.
 
+Version 1.1
+- Fixed crashing bug in didReceiveMemoryWarning, upgraded project to build with the iOS 4 SDK.
+
+Version 1.2
+- Deployment target set to iPhone OS 3.2.
+
 ===========================================================================
-Copyright (C) 2009 Apple Inc. All rights reserved.
+Copyright (C) 2010 Apple Inc. All rights reserved.
