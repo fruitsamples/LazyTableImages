@@ -13,7 +13,7 @@
     Images are scaled to the desired height.
     If rapid scrolling is in progress, downloads do not begin until scrolling has ended.
   
-  Version: 1.2 
+  Version: 1.3 
   
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple 
  Inc. ("Apple") in consideration of your agreement to the following 
@@ -53,7 +53,7 @@
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE 
  POSSIBILITY OF SUCH DAMAGE. 
   
- Copyright (C) 2010 Apple Inc. All Rights Reserved. 
+ Copyright (C) 2012 Apple Inc. All Rights Reserved. 
   
  */
 
@@ -231,6 +231,10 @@
         // Display the newly loaded image
         cell.imageView.image = iconDownloader.appRecord.appIcon;
     }
+    
+    // Remove the IconDownloader from the in progress list.
+    // This will result in it being deallocated.
+    [imageDownloadsInProgress removeObjectForKey:indexPath];
 }
 
 

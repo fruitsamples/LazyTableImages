@@ -3,7 +3,7 @@
  Abstract: Application delegate for the LazyTableImages sample.
  It also downloads in the background the "Top Paid iPhone Apps" RSS feed using NSURLConnection.
   
-  Version: 1.2 
+  Version: 1.3 
   
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple 
  Inc. ("Apple") in consideration of your agreement to the following 
@@ -43,7 +43,7 @@
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE 
  POSSIBILITY OF SUCH DAMAGE. 
   
- Copyright (C) 2010 Apple Inc. All Rights Reserved. 
+ Copyright (C) 2012 Apple Inc. All Rights Reserved. 
   
  */
 
@@ -59,6 +59,27 @@ static NSString *const TopPaidAppsFeed =
 	@"http://phobos.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/toppaidapplications/limit=75/xml";
 
 
+@interface LazyTableAppDelegate () 
+{
+    UIWindow				*window;
+    UINavigationController	*navigationController;
+	
+    // this view controller hosts our table of top paid apps
+    RootViewController      *rootViewController;
+    
+    // the list of apps shared with "RootViewController"
+    NSMutableArray          *appRecords;
+    
+    // the queue to run our "ParseOperation"
+    NSOperationQueue		*queue;
+    
+    // RSS feed network connection to the App Store
+    NSURLConnection         *appListFeedConnection;
+    NSMutableData           *appListData;
+}
+@end
+
+
 @implementation LazyTableAppDelegate
 
 @synthesize window, navigationController, appRecords, rootViewController, queue, appListFeedConnection, appListData;
@@ -71,10 +92,11 @@ static NSString *const TopPaidAppsFeed =
 // -------------------------------------------------------------------------------
 - (void)applicationDidFinishLaunching:(UIApplication *)application
 {
-	// Configure and show the window
-	[window addSubview:[self.navigationController view]];
-	[window makeKeyAndVisible];
-
+    // Initializr the app window
+    self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
+    self.window.rootViewController = self.navigationController;
+    [self.window makeKeyAndVisible];
+    
     // Initialize the array of app records and pass a reference to that list to our root view controller
     self.appRecords = [NSMutableArray array];
     rootViewController.entries = self.appRecords;
@@ -102,21 +124,6 @@ static NSString *const TopPaidAppsFeed =
     
     // tell our table view to reload its data, now that parsing has completed
     [rootViewController.tableView reloadData];
-}
-
-// -------------------------------------------------------------------------------
-//	didFinishParsing:appList
-// -------------------------------------------------------------------------------
-- (void)didFinishParsing:(NSArray *)appList
-{
-    [self performSelectorOnMainThread:@selector(handleLoadedApps:) withObject:appList waitUntilDone:NO];
-    
-    self.queue = nil;   // we are finished with the queue and our ParseOperation
-}
-
-- (void)parseErrorOccurred:(NSError *)error
-{
-    [self performSelectorOnMainThread:@selector(handleError:) withObject:error waitUntilDone:NO];
 }
 
 #pragma mark -
@@ -194,13 +201,30 @@ static NSString *const TopPaidAppsFeed =
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;   
     
     // create the queue to run our ParseOperation
-    self.queue = [[NSOperationQueue alloc] init];
+    self.queue = [[[NSOperationQueue alloc] init] autorelease];
     
     // create an ParseOperation (NSOperation subclass) to parse the RSS feed data so that the UI is not blocked
     // "ownership of appListData has been transferred to the parse operation and should no longer be
     // referenced in this thread.
     //
-    ParseOperation *parser = [[ParseOperation alloc] initWithData:appListData delegate:self];
+    ParseOperation *parser = [[ParseOperation alloc] initWithData:appListData 
+                                                completionHandler:^(NSArray *appList) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            
+            [self handleLoadedApps:appList];
+            
+        });
+        
+        self.queue = nil;   // we are finished with the queue and our ParseOperation
+    }];
+    
+    parser.errorHandler = ^(NSError *parseError) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            
+            [self handleError:parseError];
+            
+        });
+    };
     
     [queue addOperation:parser]; // this will start the "ParseOperation"
     

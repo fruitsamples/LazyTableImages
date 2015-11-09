@@ -13,12 +13,12 @@ so the UI is more responsive.
 ===========================================================================
 BUILD REQUIREMENTS:
 
-iOS 4.0 SDK
+iOS 5.0 SDK or later
 
 ===========================================================================
 RUNTIME REQUIREMENTS:
 
-iPhone OS 3.2 or later
+iOS 5.0 or later
 
 ===========================================================================
 PACKAGING LIST:
@@ -54,5 +54,15 @@ Version 1.1
 Version 1.2
 - Deployment target set to iPhone OS 3.2.
 
+Version 1.3
+- Upgraded project to build with the iOS 5 SDK.
+- Deployment target set to iOS 5.
+- Fixed an analyzer warning in LazyTableAppDelegate.
+- Fixed a subtle memory leak in RootViewController.
+- Changed ParseOperation to use blocks for its callbacks instead of delegation.
+- Updated initial nib loading and app window setup to reflect the most recent recommended practices.
+- Renamed a defined constant in IconDownloader to be less confusing.
+- Fixed a bug in IconDownloader that may cause a downloaded app icon to not be resized properly.
+
 ===========================================================================
-Copyright (C) 2010 Apple Inc. All rights reserved.
+Copyright (C) 2012 Apple Inc. All rights reserved.

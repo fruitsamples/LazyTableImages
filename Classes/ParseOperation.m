@@ -2,7 +2,7 @@
      File: ParseOperation.m 
  Abstract: NSOperation code for parsing the RSS feed.
   
-  Version: 1.2 
+  Version: 1.3 
   
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple 
  Inc. ("Apple") in consideration of your agreement to the following 
@@ -42,7 +42,7 @@
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE 
  POSSIBILITY OF SUCH DAMAGE. 
   
- Copyright (C) 2010 Apple Inc. All Rights Reserved. 
+ Copyright (C) 2012 Apple Inc. All Rights Reserved. 
   
  */
 
@@ -59,7 +59,7 @@ static NSString *kEntryStr  = @"entry";
 
 
 @interface ParseOperation ()
-@property (nonatomic, assign) id <ParseOperationDelegate> delegate;
+@property (nonatomic, copy) ArrayBlock completionHandler;
 @property (nonatomic, retain) NSData *dataToParse;
 @property (nonatomic, retain) NSMutableArray *workingArray;
 @property (nonatomic, retain) AppRecord *workingEntry;
@@ -70,15 +70,15 @@ static NSString *kEntryStr  = @"entry";
 
 @implementation ParseOperation
 
-@synthesize delegate, dataToParse, workingArray, workingEntry, workingPropertyString, elementsToParse, storingCharacterData;
+@synthesize completionHandler, errorHandler, dataToParse, workingArray, workingEntry, workingPropertyString, elementsToParse, storingCharacterData;
 
-- (id)initWithData:(NSData *)data delegate:(id <ParseOperationDelegate>)theDelegate
+- (id)initWithData:(NSData *)data completionHandler:(ArrayBlock)handler
 {
     self = [super init];
     if (self != nil)
     {
         self.dataToParse = data;
-        self.delegate = theDelegate;
+        self.completionHandler = handler;
         self.elementsToParse = [NSArray arrayWithObjects:kIDStr, kNameStr, kImageStr, kArtistStr, nil];
     }
     return self;
@@ -89,6 +89,8 @@ static NSString *kEntryStr  = @"entry";
 // -------------------------------------------------------------------------------
 - (void)dealloc
 {
+    [completionHandler release];
+    [errorHandler release];
     [dataToParse release];
     [workingEntry release];
     [workingPropertyString release];
@@ -118,8 +120,8 @@ static NSString *kEntryStr  = @"entry";
 	
 	if (![self isCancelled])
     {
-        // notify our AppDelegate that the parsing is complete
-        [self.delegate didFinishParsing:self.workingArray];
+        // call our completion handler with the result of our parsing
+        self.completionHandler(self.workingArray);
     }
     
     self.workingArray = nil;
@@ -196,7 +198,7 @@ static NSString *kEntryStr  = @"entry";
 
 - (void)parser:(NSXMLParser *)parser parseErrorOccurred:(NSError *)parseError
 {
-    [delegate parseErrorOccurred:parseError];
+    self.errorHandler(parseError);
 }
 
 @end

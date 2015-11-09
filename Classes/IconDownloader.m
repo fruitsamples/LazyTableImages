@@ -6,7 +6,7 @@
  
  A simple BOOL tracks whether or not a download is already in progress to avoid redundant requests.
   
-  Version: 1.2 
+  Version: 1.3 
   
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple 
  Inc. ("Apple") in consideration of your agreement to the following 
@@ -46,14 +46,14 @@
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE 
  POSSIBILITY OF SUCH DAMAGE. 
   
- Copyright (C) 2010 Apple Inc. All Rights Reserved. 
+ Copyright (C) 2012 Apple Inc. All Rights Reserved. 
   
  */
 
 #import "IconDownloader.h"
 #import "AppRecord.h"
 
-#define kAppIconHeight 48
+#define kAppIconSize 48
 
 
 @implementation IconDownloader
@@ -120,9 +120,9 @@
     // Set appIcon and clear temporary data/image
     UIImage *image = [[UIImage alloc] initWithData:self.activeDownload];
     
-    if (image.size.width != kAppIconHeight && image.size.height != kAppIconHeight)
+    if (image.size.width != kAppIconSize || image.size.height != kAppIconSize)
 	{
-        CGSize itemSize = CGSizeMake(kAppIconHeight, kAppIconHeight);
+        CGSize itemSize = CGSizeMake(kAppIconSize, kAppIconSize);
 		UIGraphicsBeginImageContext(itemSize);
 		CGRect imageRect = CGRectMake(0.0, 0.0, itemSize.width, itemSize.height);
 		[image drawInRect:imageRect];
